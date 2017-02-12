@@ -1,5 +1,6 @@
 #proj2.py
 import urllib.request, urllib.parse, urllib.error
+import re
 from bs4 import BeautifulSoup
 
 #### Problem 1 ####
@@ -27,20 +28,45 @@ mdlhtml = urllib.request.urlopen(mdl)
 mdlsoup = BeautifulSoup(mdlhtml, 'html.parser')
 
 most_reads = mdlsoup.find_all('div', class_='view view-most-read view-id-most_read view-display-id-panel_pane_1 view-dom-id-99658157999dd0ac5aa62c2b284dd266')
+
 for h in most_reads:
     print (h.get_text().rstrip().lstrip())
 
-'''
+
 #### Problem 3 ####
 print('\n*********** PROBLEM 3 ***********')
 print("Mark's page -- Alt tags\n")
 
 ### Your Problem 3 solution goes here
+cat = 'http://newmantaylor.com/gallery.html'
 
+cathtml = urllib.request.urlopen(cat)
+catsoup = BeautifulSoup(cathtml, 'html.parser')
+
+gallery = catsoup.find_all('img')
+for img in gallery:
+    alt = img.get('alt', '')
+    if alt != '':
+        print (alt)
+    else:
+        print ("No altenative text provided!")
 
 #### Problem 4 ####
 print('\n*********** PROBLEM 4 ***********')
 print("UMSI faculty directory emails\n")
 
 ### Your Problem 4 solution goes here
-'''
+counter = 1
+for page in range(6): #change range
+    directory = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=4&page='
+    url = directory+str(page)
+    urlhtml = urllib.request.urlopen(url)
+    urlsoup = BeautifulSoup(urlhtml, 'html.parser')
+    contact_list = urlsoup.find_all('div', class_='field field-name-contact-details field-type-ds field-label-hidden')
+    for contact in contact_list:
+        indurl = 'https://www.si.umich.edu'+re.findall(r'\/.+\d', str(contact))[0]
+        indhtml = urllib.request.urlopen(indurl)
+        indsoup = BeautifulSoup(indhtml, 'html.parser')
+        for link in indsoup.find_all(href=re.compile("@")):
+            print (str(counter) + " " +link.get_text())
+            counter +=1
