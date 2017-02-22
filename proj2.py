@@ -2,6 +2,7 @@
 import urllib.request, urllib.parse, urllib.error
 import re
 from bs4 import BeautifulSoup
+import requests
 
 #### Problem 1 ####
 print('\n*********** PROBLEM 1 ***********')
@@ -15,7 +16,7 @@ nytsoup = BeautifulSoup(nythtml, 'html.parser')
 
 headings = nytsoup.find_all('h2', class_='story-heading')
 for h in headings[:10]:
-    print (h.get_text().lstrip().rstrip())
+    print (h.get_text().strip())
 
 #### Problem 2 ####
 print('\n*********** PROBLEM 2 ***********')
@@ -60,13 +61,15 @@ counter = 1
 for page in range(6): #change range
     directory = 'https://www.si.umich.edu/directory?field_person_firstname_value=&field_person_lastname_value=&rid=4&page='
     url = directory+str(page)
-    urlhtml = urllib.request.urlopen(url)
-    urlsoup = BeautifulSoup(urlhtml, 'html.parser')
+    #urlhtml = urllib.request.Request(url, None,{'User-Agent': 'SI_CLASS'})
+    urlhtml = requests.get(url, headers={'User-Agent': 'SI_CLASS'})
+    urlsoup = BeautifulSoup(urlhtml.text, 'html.parser')
     contact_list = urlsoup.find_all('div', class_='field field-name-contact-details field-type-ds field-label-hidden')
     for contact in contact_list:
         indurl = 'https://www.si.umich.edu'+re.findall(r'\/.+\d', str(contact))[0]
-        indhtml = urllib.request.urlopen(indurl)
-        indsoup = BeautifulSoup(indhtml, 'html.parser')
+        #indhtml = urllib.request.Request(indurl, None,{'User-Agent': 'SI_CLASS'})
+        indhtml = requests.get(indurl, headers={'User-Agent': 'SI_CLASS'})
+        indsoup = BeautifulSoup(indhtml.text, 'html.parser')
         for link in indsoup.find_all(href=re.compile("@")):
             print (str(counter) + " " +link.get_text())
             counter +=1
